@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server'
-import connectDB from '@/lib/mongodb'
-import Submission from '@/models/Submission'
 
 export async function POST(request: Request) {
   try {
@@ -15,37 +13,23 @@ export async function POST(request: Request) {
       )
     }
 
-    // Connect to the database
-    await connectDB()
-
-    // Create and save the submission
-    const submission = await Submission.create({
+    // Log the submission (for development purposes)
+    console.log('Form submission received:', {
       name,
       email,
       phone,
       service,
       message,
+      timestamp: new Date().toISOString(),
     })
 
-    // Return success response with the submission ID
+    // Return success response
     return NextResponse.json(
-      { 
-        message: 'Form submitted successfully',
-        submissionId: submission._id 
-      },
+      { message: 'Form submitted successfully' },
       { status: 200 }
     )
   } catch (error) {
     console.error('Error processing form submission:', error)
-    
-    // Handle validation errors
-    if (error instanceof Error && error.name === 'ValidationError') {
-      return NextResponse.json(
-        { error: 'Invalid form data' },
-        { status: 400 }
-      )
-    }
-
     return NextResponse.json(
       { error: 'Failed to process form submission' },
       { status: 500 }
